@@ -243,7 +243,7 @@ runs:
           -e JOB_SUMMARY="${{ inputs.job_summary }}" \
           -e SEARCH_PULL_REQUESTS="${{ inputs.search_pull_requests }}" \
           -w "$GITHUB_WORKSPACE" \
-          harbor-d1f7c478-15d8-4165.intuitionmachines.com:14556/ops/publish-unit-test-result-action@sha256:86308997bdfca47837503c52ed8d503614fc8208d176727356ab7061d7f7ad47
+          ${{ inputs.registry }}/ops/publish-unit-test-result-action@sha256:86308997bdfca47837503c52ed8d503614fc8208d176727356ab7061d7f7ad47
       shell: bash
 
 branding:
