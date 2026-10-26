@@ -1,4 +1,4 @@
-FROM python:3.12-alpine
+FROM python:3.12.13-alpine3.24@sha256:dbb1970cc04ce7d381c65efe8309c0c03d463e5b35c88f14d721796ad24cfbfd
 
 LABEL org.opencontainers.image.title="publish-unit-test-result-action"
 LABEL org.opencontainers.image.source="https://github.com/IntuitionMachines/publish-unit-test-result-action"
@@ -11,7 +11,7 @@ LABEL com.github.actions.color="green"
 
 RUN apk add --no-cache --upgrade expat libuuid xz-libs
 
-COPY python/requirements-post-3.8.txt /action/requirements.txt
+COPY python/requirements-post-3.10.txt /action/requirements.txt
 RUN apk add --no-cache build-base libffi-dev; \
     pip install --upgrade --force --no-cache-dir pip && \
     pip install --upgrade --force --no-cache-dir -r /action/requirements.txt; \

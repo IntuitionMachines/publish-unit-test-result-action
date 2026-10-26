@@ -22,12 +22,12 @@ runs:
 
     - name: Setup Python
       if: inputs.python-version != 'installed'
-      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
       with:
         python-version: ${{ inputs.python-version }}
 
     - name: Checkout
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
 
     - name: Detect OS
       id: os
@@ -49,7 +49,7 @@ runs:
       shell: bash
 
     - name: Cache PIP Packages
-      uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306  # v5.0.3
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
       id: cache
       if: github.event_name != 'schedule'
       with:
@@ -83,8 +83,12 @@ runs:
           DEPENDENCIES_VERSION=3.7
         elif [[ "$PYTHON_VERSION" == "3.8" ]]; then
           DEPENDENCIES_VERSION=3.8
+        elif [[ "$PYTHON_VERSION" == "3.9" ]]; then
+          DEPENDENCIES_VERSION=3.9
+        elif [[ "$PYTHON_VERSION" == "3.10" ]]; then
+          DEPENDENCIES_VERSION=3.10
         else
-          DEPENDENCIES_VERSION=post-3.8
+          DEPENDENCIES_VERSION=post-3.10
         fi
         python -m pip install --force -r python/requirements-$DEPENDENCIES_VERSION.txt
         python -m pip install --force -r python/test/requirements.txt -c python/test/constraints.txt
@@ -101,14 +105,14 @@ runs:
           exit 1
         fi
       shell: bash
-  
+
     - name: Update expectation files
       id: changes
       continue-on-error: true
       run: |
         python/test/files/update_expectations.sh
         git status
-  
+
         if ! git diff --exit-code || [[ $(git ls-files -o --exclude-standard | wc -l) -gt 0 ]]
         then
           # we only upload the changed files if we can find zip
@@ -121,12 +125,16 @@ runs:
       shell: bash
     - name: Upload changed expectation files
       if: steps.changes.outcome == 'failure'
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6.0.0
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
       with:
         name: Changed expectations (python-${{ inputs.python-version }}, ${{ inputs.os }})
         path: changed-expectations.zip
         if-no-files-found: error
-  
+    - name: Restore changed expectation files
+      if: steps.changes.outcome == 'failure'
+      run: git restore .
+      shell: bash
+
     - name: PyTest
       env:
         PYTHONPATH: ..
@@ -134,7 +142,7 @@ runs:
         cd python/test
         python -m pytest --capture=tee-sys --continue-on-collection-errors --junit-xml ../../test-results/pytest.xml
       shell: bash
-  
+
     - name: PyTest (EST)
       env:
         TZ: US/Eastern
@@ -144,7 +152,7 @@ runs:
         cd python/test
         python -m pytest --capture=tee-sys --continue-on-collection-errors --junit-xml ../../test-results/pytest-est.xml
       shell: bash
-  
+
     - name: PyTest (CET)
       env:
         TZ: Europe/Berlin
@@ -154,10 +162,10 @@ runs:
         cd python/test
         python -m pytest --capture=tee-sys --continue-on-collection-errors --junit-xml ../../test-results/pytest-cet.xml
       shell: bash
-  
+
     - name: Upload Test Results
       if: (!cancelled())
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6.0.0
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
       with:
         name: Test Results (python-${{ inputs.python-version }}, ${{ inputs.os }})
         path: |

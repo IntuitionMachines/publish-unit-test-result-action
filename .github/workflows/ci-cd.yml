@@ -19,12 +19,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
       - name: Check requirements.txt
         run: |
           (diff -w <(grep -v -e "python_version >  '3.7'" -e "python_version == '3.8'" -e "python_version >  '3.8'" -e "python_version == '3.9'" -e "python_version >  '3.9'" python/requirements.txt | sed -e "s/;.*//") python/requirements-3.7.txt || true) | (! grep -e "^<")
           (diff -w <(grep -v -e "python_version <= '3.7'" -e "python_version >  '3.8'" -e "python_version == '3.9'" -e "python_version >  '3.9'" python/requirements.txt | sed -e "s/;.*//") python/requirements-3.8.txt || true) | (! grep -e "^<")
-          (diff -w <(grep -v -e "python_version <= '3.7'" -e "python_version == '3.8'" python/requirements.txt | sed -e "s/;.*//") <(sed -e "s/;.*//" python/requirements-post-3.8.txt) || true) | (! grep -e "^<")
+          (diff -w <(grep -v -e "python_version <= '3.7'" -e "python_version == '3.8'" -e "python_version >  '3.9'" python/requirements.txt | sed -e "s/;.*//") <(sed -e "s/;.*//" python/requirements-3.9.txt) || true) | (! grep -e "^<")
+          (diff -w <(grep -v -e "python_version <= '3.7'" -e "python_version == '3.8'" -e "python_version <= '3.9'" -e "python_version == '3.9'" python/requirements.txt | sed -e "s/;.*//") <(sed -e "s/;.*//" python/requirements-3.10.txt) || true) | (! grep -e "^<")
+          (diff -w <(grep -v -e "python_version <= '3.7'" -e "python_version == '3.8'" -e "python_version <= '3.9'" -e "python_version == '3.9'" python/requirements.txt | sed -e "s/;.*//") <(sed -e "s/;.*//" python/requirements-post-3.10.txt) || true) | (! grep -e "^<")
         shell: bash
 
   upgrade:
@@ -33,33 +35,33 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
       - name: Setup Python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
         with:
           python-version: '3.8'
       - name: Setup Python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
         with:
           python-version: '3.9'
       - name: Setup Python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
         with:
           python-version: '3.10'
       - name: Setup Python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
         with:
           python-version: '3.11'
       - name: Setup Python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
         with:
           python-version: '3.12'
       - name: Setup Python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
         with:
           python-version: '3.13'
       - name: Setup Python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
         with:
           python-version: '3.14'
       - name: Check for dependency updates
@@ -89,11 +91,15 @@ jobs:
     name: "Test Ubuntu"
     uses: "./.github/workflows/test-os.yml"
     with:
-      os: '["ubuntu-22.04", "ubuntu-24.04", "ubuntu-slim"]'
+      os: '["ubuntu-22.04", "ubuntu-22.04-arm", "ubuntu-24.04", "ubuntu-24.04-arm", "ubuntu-slim"]'
       python-version: '["3.9", "3.10", "3.11", "3.12", "3.13", "3.14", "installed"]'
       include: >
         [
           {"os": "ubuntu-22.04", "python-version": "3.8"},
+          {"os": "ubuntu-26.04", "python-version": "3.13"},
+          {"os": "ubuntu-26.04", "python-version": "3.14"},
+          {"os": "ubuntu-26.04-arm", "python-version": "3.13"},
+          {"os": "ubuntu-26.04-arm", "python-version": "3.14"},
         ]
 
   test-win:
@@ -131,7 +137,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
 
       - name: Extract action image and version
         # we deploy from a specific commit on master (the one that mentions a new version the first time)
@@ -165,7 +171,7 @@ jobs:
     steps:
       - name: Docker meta
         id: docker-meta
-        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051  # v5.10.0
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302  # v6.2.0
         with:
           images: ghcr.io/EnricoMi/publish-unit-test-result-action
           flavor: |
@@ -179,20 +185,20 @@ jobs:
             type=semver,pattern={{version}},value=${{ needs.config-deploy.outputs.image-version }}
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130  # v3.7.0
+        uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1  # v4.4.0
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f  # v3.12.0
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069  # v4.4.1
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9  # v3.7.0
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f  # v4.6.0
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.CR_PAT }}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8  # v6.19.2
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc  # v7.4.0
         with:
           tags: ${{ steps.docker-meta.outputs.tags }}
           labels: ${{ steps.docker-meta.outputs.labels }}
@@ -215,7 +221,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Upload
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: Event File
           path: ${{ github.event_path }}
