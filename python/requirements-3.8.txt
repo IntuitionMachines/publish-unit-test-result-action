@@ -1,3 +1,4 @@
+certifi>=2026.10.18
 humanize==4.10.0
 junitparser==4.0.2
 lxml==6.0.2
@@ -8,7 +9,6 @@ PyGithub==2.8.1
     cffi==1.17.1
       pycparser==2.23
   requests==2.32.4
-    certifi==2026.1.4
     charset-normalizer==3.4.4
     idna==3.11
     urllib3==2.2.3
