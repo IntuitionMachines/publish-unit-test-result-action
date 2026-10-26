@@ -295,6 +295,14 @@ with:
     !config.xml
 ```
 
+The root action authenticates to a private container registry and requires these inputs:
+
+|Option|Description|
+|:-----|:----------|
+|`registry`|Container registry hostname, including the port if needed.|
+|`registry_username`|Username for authenticating to the container registry.|
+|`registry_password`|Password or token for the container registry. Pass this through a GitHub Actions secret.|
+
 The list of most notable options:
 
 |Option|Default Value|Description|
@@ -560,10 +568,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
 
       - name: Setup Python ${{ matrix.python-version }}
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -572,7 +580,7 @@ jobs:
 
       - name: Upload Test Results
         if: (!cancelled())
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: Test Results (Python ${{ matrix.python-version }})
           path: pytest.xml
@@ -596,7 +604,7 @@ jobs:
 
     steps:
       - name: Download Artifacts
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131  # v7.0.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
         with:
           path: artifacts
 
@@ -637,7 +645,7 @@ event_file:
   runs-on: ubuntu-latest
   steps:
   - name: Upload
-    uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6.0.0
+    uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
     with:
       name: Event File
       path: ${{ github.event_path }}
@@ -649,7 +657,7 @@ Adjust the value of `path` to fit your setup:
 ```yaml
 - name: Upload Test Results
   if: (!cancelled())
-  uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6.0.0
+  uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
   with:
     name: Test Results
     path: |
@@ -707,7 +715,7 @@ jobs:
 
     steps:
       - name: Download and Extract Artifacts
-        uses: dawidd6/action-download-artifact@fe9d59ce33ce92db8a6ac90b2c8be6b6d90417c8  # v15
+        uses: dawidd6/action-download-artifact@d63b86af1b34672e53c440b1b83979861906bad7  # v24
         with:
            run_id: ${{ github.event.workflow_run.id }}
            path: artifacts
@@ -802,7 +810,7 @@ steps:
     esac
 
 - name: Create badge
-  uses: emibcn/badge-action@808173dd03e2f30c980d03ee49e181626088eee8  # v2.0.3
+  uses: emibcn/badge-action@f9150fde070fcca0c4e832437611b44838fcd325  # v2.0.4
   with:
     label: Tests
     status: '${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.tests }} tests, ${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.runs }} runs: ${{ fromJSON( steps.test-results.outputs.json ).conclusion }}'
@@ -875,7 +883,7 @@ Self-hosted runners may require setting up a Python environment first:
 
 ```yaml
 - name: Setup Python
-  uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+  uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
   with:
     python-version: 3.8
 ```

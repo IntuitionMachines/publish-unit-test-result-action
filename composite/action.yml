@@ -195,8 +195,12 @@ runs:
           echo "DEPENDENCIES_VERSION=3.7" >> "$GITHUB_ENV"
         elif [[ "$PYTHON_VERSION" == "3.8" ]]; then
           echo "DEPENDENCIES_VERSION=3.8" >> "$GITHUB_ENV"
+        elif [[ "$PYTHON_VERSION" == "3.9" ]]; then
+          echo "DEPENDENCIES_VERSION=3.9" >> "$GITHUB_ENV"
+        elif [[ "$PYTHON_VERSION" == "3.10" ]]; then
+          echo "DEPENDENCIES_VERSION=3.10" >> "$GITHUB_ENV"
         else
-          echo "DEPENDENCIES_VERSION=post-3.8" >> "$GITHUB_ENV"
+          echo "DEPENDENCIES_VERSION=post-3.10" >> "$GITHUB_ENV"
         fi
         echo "version=$PYTHON_VERSION" >> "$GITHUB_OUTPUT"
 
@@ -204,12 +208,12 @@ runs:
       shell: bash
 
     - name: Restore PIP packages cache
-      uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306  # v5.0.3
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
       id: cache
       continue-on-error: true
       with:
         path: .enricomi-publish-action-pip
-        key: enricomi-publish-action-pip-${{ runner.os }}-${{ runner.arch }}-${{ steps.python.outputs.version }}-a5497e3be8fe59259cccb1cb1eb058c2
+        key: enricomi-publish-action-pip-${{ runner.os }}-${{ runner.arch }}-${{ steps.python.outputs.version }}-b3391e58ad38afbb1402f3903470d937
 
     - name: Create virtualenv
       id: venv
@@ -321,7 +325,7 @@ runs:
       shell: bash
 
     - name: Save PIP packages cache
-      uses: actions/cache/save@cdf6c1fa76f9f475f3d7449005a359c84ca0f306  # v5.0.3
+      uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
       if: ( success() || failure() ) && ! steps.cache.outputs.cache-hit
       continue-on-error: true
       with:
