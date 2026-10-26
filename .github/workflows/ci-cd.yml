@@ -71,10 +71,12 @@ jobs:
           tox
           git diff | tee diff
           if [ -s "diff" ]; then
-            echo 'Dependencies can be upgraded' >> $GITHUB_STEP_SUMMARY
-            echo '```diff' >> $GITHUB_STEP_SUMMARY
-            cat diff >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
+            {
+              echo 'Dependencies can be upgraded'
+              echo '```diff'
+              cat diff
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
             exit 1
           fi
         shell: bash
@@ -146,8 +148,8 @@ jobs:
         run: |
           image=$(grep -A 10 "^runs:" action.yml | grep -E "^\s+image:\s" | sed -E -e "s/^\s+image:\s*'//" -e "s/docker:\/\///" -e "s/'\s*$//")
           version=$(cut -d : -f 2 <<< "$image")
-          echo "image=$image" >>$GITHUB_OUTPUT
-          echo "version=$version" >>$GITHUB_OUTPUT
+          echo "image=$image" >>"$GITHUB_OUTPUT"
+          echo "version=$version" >>"$GITHUB_OUTPUT"
         shell: bash
 
       - name: Check action image existence
@@ -157,7 +159,7 @@ jobs:
         run: |
           if docker manifest inspect '${{ steps.action.outputs.image }}'
           then
-            echo "exists=true" >>$GITHUB_OUTPUT
+            echo "exists=true" >>"$GITHUB_OUTPUT"
           fi
         shell: bash
 

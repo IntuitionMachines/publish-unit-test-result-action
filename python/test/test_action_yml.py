@@ -15,20 +15,39 @@ project_root = pathlib.Path(__file__).resolve().parent.parent.parent
 class TestActionYml(unittest.TestCase):
 
     def test_action_version(self):
-        with open(project_root / 'action.yml', encoding='utf-8') as r:
-            dockerfile_action = yaml.safe_load(r)
-
-        image = dockerfile_action.get('runs', {}).get('image', '')
-        self.assertTrue(image.startswith('docker://'), image)
-        version = image.split(':')[-1]
-        self.assertEqual(__version__, version, 'version in action.yml must match __version__ in python/publish/__init__.py')
-
         with open(project_root / 'docker' / 'action.yml', encoding='utf-8') as r:
             docker_action = yaml.safe_load(r)
 
         default_docker_tag = docker_action.get('inputs', {}).get('docker_tag', {}).get('default')
-        self.assertEqual(default_docker_tag, version, 'version in docker/action.yml must match __version__ in python/publish/__init__.py')
+        self.assertEqual(default_docker_tag, __version__, 'version in docker/action.yml must match __version__ in python/publish/__init__.py')
 
+
+    def test_registry_action(self):
+        with open(project_root / 'action.yml', encoding='utf-8') as r:
+            action = yaml.safe_load(r)
+        with open(project_root / 'composite' / 'action.yml', encoding='utf-8') as r:
+            composite_action = yaml.safe_load(r)
+
+        registry_inputs = {'registry', 'registry_username', 'registry_password'}
+        for key in registry_inputs:
+            self.assertTrue(action['inputs'][key]['required'])
+        common_inputs = {key: value for key, value in action['inputs'].items()
+                         if key not in registry_inputs}
+        self.assertEqual(common_inputs, composite_action['inputs'])
+        self.assertEqual(action['outputs'], composite_action['outputs'])
+        self.assertEqual(action['runs']['using'], 'composite')
+        login, publish = action['runs']['steps']
+        self.assertTrue(login['uses'].startswith('docker/login-action@'))
+        self.assertEqual(login['with'], {
+            'registry': '${{ inputs.registry }}',
+            'username': '${{ inputs.registry_username }}',
+            'password': '${{ inputs.registry_password }}',
+        })
+        self.assertEqual(publish['id'], 'test-results')
+        self.assertRegex(publish['run'],
+                         r'\$\{\{ inputs.registry \}\}/ops/publish-unit-test-result-action@sha256:[0-9a-f]{64}')
+        for key in common_inputs.keys() - {'github_token_actor'}:
+            self.assertIn(f'-e {key.upper()}="${{{{ inputs.{key} }}}}"', publish['run'])
 
     def test_composite_action(self):
         self.do_test_composite_action('composite')
@@ -46,7 +65,7 @@ class TestActionYml(unittest.TestCase):
         self.do_test_composite_action('windows/bash')
 
     def do_test_composite_action(self, action: str):
-        with open(project_root / 'action.yml', encoding='utf-8') as r:
+        with open(project_root / 'composite' / 'action.yml', encoding='utf-8') as r:
             dockerfile_action = yaml.safe_load(r)
 
         with open(project_root / f'{action}/action.yml', encoding='utf-8') as r:
@@ -56,10 +75,6 @@ class TestActionYml(unittest.TestCase):
         self.assertIn('runs', composite_action)
         dockerfile_action_wo_runs = {k: v for k, v in dockerfile_action.items() if k != 'runs'}
         composite_action_wo_runs = {k: v for k, v in composite_action.items() if k != 'runs'}
-
-        # composite action has outputs.json.value, which does not exist for dockerfile action
-        self.assertIn('value', composite_action.get('outputs', {}).get('json', {}))
-        del composite_action.get('outputs', {}).get('json', {})['value']
 
         # compare dockerfile action with composite action
         self.assertEqual(dockerfile_action_wo_runs, composite_action_wo_runs)
@@ -93,7 +108,7 @@ class TestActionYml(unittest.TestCase):
                                                             f'to update the MD5 hash in {action}/action.yml')
 
     def test_docker_action(self):
-        with open(project_root / 'action.yml', encoding='utf-8') as r:
+        with open(project_root / 'composite' / 'action.yml', encoding='utf-8') as r:
             base_action = yaml.safe_load(r)
         expected_inputs = list(base_action.get('inputs', {}).keys() - ['github_token_actor']) + ['log_level', 'root_log_level']
 
@@ -122,7 +137,11 @@ class TestActionYml(unittest.TestCase):
         self.assertEqual(sorted(expected_inputs), sorted(vars))
 
     def test_action_types(self):
-        self.do_test_action_types('.')
+        self.do_test_action_types('.', extra_inputs={
+            'registry': {'type': 'string'},
+            'registry_username': {'type': 'string'},
+            'registry_password': {'type': 'string'},
+        })
 
     def test_composite_action_types(self):
         self.do_test_action_types('composite')
@@ -148,7 +167,7 @@ class TestActionYml(unittest.TestCase):
         self.do_test_action_types('windows/bash')
 
     def do_test_action_types(self, subaction: str, extra_inputs: dict = None):
-        with open(project_root / 'action-types.yml', encoding='utf-8') as r:
+        with open(project_root / 'composite' / 'action-types.yml', encoding='utf-8') as r:
             root_action_types = yaml.safe_load(r)
         if extra_inputs:
             root_action_types.get('inputs', {}).update(extra_inputs)

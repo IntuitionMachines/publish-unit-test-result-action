@@ -295,6 +295,14 @@ with:
     !config.xml
 ```
 
+The root action authenticates to a private container registry and requires these inputs:
+
+|Option|Description|
+|:-----|:----------|
+|`registry`|Container registry hostname, including the port if needed.|
+|`registry_username`|Username for authenticating to the container registry.|
+|`registry_password`|Password or token for the container registry. Pass this through a GitHub Actions secret.|
+
 The list of most notable options:
 
 |Option|Default Value|Description|

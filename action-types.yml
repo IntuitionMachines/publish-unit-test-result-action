@@ -168,6 +168,15 @@ inputs:
   search_pull_requests:
     type: boolean
 
+  registry:
+    type: string
+
+  registry_username:
+    type: string
+
+  registry_password:
+    type: string
+
 outputs:
   json:
     type: string
